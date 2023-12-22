@@ -38,6 +38,9 @@ def simulate_packets(config):
             time.sleep(config["packet_period"])
         
 
+'''
+Reads the config file. At this moment, it is mocked.
+'''
 def read_config_file(path):
     #TODO
     return {
