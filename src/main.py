@@ -9,7 +9,6 @@ Cada N segundos:
     - Enviar paquete a la queue.
 '''
 
-from threading import Thread, Lock
 import time, random
 import logging
 
