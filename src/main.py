@@ -1,7 +1,7 @@
 '''
 Leer archivo de configuracion
 
-Cada N minutos:
+Cada N segundos:
     - Generar un paquete de datos
     - Decidir si el paquete es apto para ser enviado
         - Si no es apto, descartar y esperar al siguiente.
@@ -10,38 +10,49 @@ Cada N minutos:
 '''
 
 from threading import Thread, Lock
-import time
+import time, random
+import logging
 
-def counter():
-    global resto
-    contador = 0
+from data_packet import generate_data, create_packet, current_packet_differs_from_last_sent
+
+def simulate_packets(config):
+    last_sent_packet = None
     while True:
-        contador += 1
-        with resto_lock:  
-            print(f"COUNTER: {contador} - {resto} = {contador - resto}")
-        time.sleep(1)
+        try:
+            temperature, humidity, light, watering = generate_data()
+            current_packet = create_packet(temperature, humidity, light, watering)
+            
+            if not current_packet:
+                continue
+
+            if current_packet_differs_from_last_sent(current_packet, last_sent_packet, config["deviations"]):
+                # TODO: Send packet to the RabbitMQ queue
+                logging.info(f"Packet sent: {current_packet}")
+                
+                last_sent_packet = current_packet
 
 
-def user_input():
-    global resto
-    while True:
-        user_input = input()
-        if user_input.lower() == 'exit':
-            break
-        with resto_lock:
-            resto = int(user_input)
-        print(f"USER-INPUT: {resto}")
+        except Exception as err:
+            logging.warning(err)
+        finally:
+            time.sleep(config["packet_period"])
+        
+
+def read_config_file(path):
+    #TODO
+    return {
+        "packet_period": 1,
+        "device_id": str(random.getrandbits(128)),
+        "deviations": {
+            "temperature": 3,
+            "humidity": 5,
+            "light": 25,
+            "watering": 5
+    }
+}
 
 if __name__ == '__main__':
-    resto = 0
-    resto_lock = Lock()  
+    logging.basicConfig(level=logging.INFO)
+    config = read_config_file("")
 
-    hilo_incremento = Thread(target=counter)
-    hilo_decremento = Thread(target=user_input)
-
-    hilo_incremento.start()
-    hilo_decremento.start()
-
-    hilo_decremento.join()
-    hilo_incremento.join()
-    
+    simulate_packets(config)
