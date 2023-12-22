@@ -11,10 +11,11 @@ Cada N segundos:
 
 import time, random
 import logging
+import pika
 
 from data_packet import generate_data, create_packet, current_packet_differs_from_last_sent
 
-def simulate_packets(config):
+def simulate_packets(config, channel):
     last_sent_packet = None
     while True:
         try:
@@ -27,6 +28,12 @@ def simulate_packets(config):
             if current_packet_differs_from_last_sent(current_packet, last_sent_packet, config["deviations"]):
                 # TODO: Send packet to the RabbitMQ queue
                 logging.info(f"Packet sent: {current_packet}")
+                
+                res = channel.basic_publish(exchange='',
+                        routing_key='hello',
+                        body=str(current_packet))
+                
+                print("Result: ", res)
                 
                 last_sent_packet = current_packet
 
@@ -57,4 +64,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     config = read_config_file("")
 
-    simulate_packets(config)
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='hello')
+
+    simulate_packets(config, channel)
