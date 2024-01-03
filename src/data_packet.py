@@ -1,33 +1,4 @@
 import random as rnd
-import requests as req
-from requests import Response
-from dotenv import load_dotenv
-from os import environ
-from typing import Optional, Tuple
-import math
-
-
-load_dotenv()
-
-def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
-    
-    base_params = {
-        "q": location,
-        "APPID": environ['WEATHER_API_KEY']
-    }
-    res: Response = req.get(environ["WEATHER_API_URL"], params=base_params)
-
-    if not res.ok:
-        raise Exception("Could fetch temperature and humidity from weather API")
-    
-    result = res.json()
-    temperature = int(result["main"]["temp"] - 273.15)
-    humidity = result["main"]["humidity"]
-
-    return temperature, humidity
-
-
-
 
 
 '''

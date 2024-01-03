@@ -35,7 +35,6 @@ def simulate_packets(config):
         except Exception as err:
             logging.warning(err)
         finally:
-            print(current_packet)
             time.sleep(config["packet_period"])
         
 
