@@ -1,4 +1,34 @@
 import random as rnd
+import requests as req
+from requests import Response
+from dotenv import load_dotenv
+from os import environ
+from typing import Optional, Tuple
+import math
+
+
+load_dotenv()
+
+def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
+    
+    base_params = {
+        "q": location,
+        "APPID": environ['WEATHER_API_KEY']
+    }
+    res: Response = req.get(environ["WEATHER_API_URL"], params=base_params)
+
+    if not res.ok:
+        raise Exception("Could fetch temperature and humidity from weather API")
+    
+    result = res.json()
+    temperature = int(result["main"]["temp"] - 273.15)
+    humidity = result["main"]["humidity"]
+
+    return temperature, humidity
+
+
+
+
 
 '''
 Creates a data packet with simulated data, validating the data before that.
@@ -39,14 +69,13 @@ Generates the parameters data: temperature, humidity, light and watering.
 - 
 -
 '''
-def generate_data():
+def generate_data(location = "Pilar, AR") -> Tuple[int, int, int, int]:
     #TODO
-    temperature = rnd.randint(-5, 30)
-    humidity = rnd.randint(0, 100)
+    temperature, humidity = fetch_temperature_and_humidity(location)
     light = rnd.randint(0, 400)
     watering = rnd.randint(0, 100)
 
-    return temperature, humidity, light, watering
+    return temperature, humidity, light, watering 
 
 '''
 Compares the current packet and the last sent packet, based in the deviations.

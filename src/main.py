@@ -28,12 +28,14 @@ def simulate_packets(config):
                 # TODO: Send packet to the RabbitMQ queue
                 logging.info(f"Packet sent: {current_packet}")
                 
+
                 last_sent_packet = current_packet
 
 
         except Exception as err:
             logging.warning(err)
         finally:
+            print(current_packet)
             time.sleep(config["packet_period"])
         
 
