@@ -1,4 +1,3 @@
-import random as rnd
 import requests as req
 from requests import Response
 from dotenv import load_dotenv
@@ -28,6 +27,7 @@ def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
     humidity = result["main"]["humidity"]
 
     return temperature, humidity
+
 
 def get_decimal_hour():
     current_hour = datetime.now()
@@ -64,7 +64,6 @@ def watering_simulator(x):
 def fetch_watering():
     x = get_decimal_hour()
     return round(watering_simulator(x))
-
 
 
 def create_packet(temperature: int = None,
