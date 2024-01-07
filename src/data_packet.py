@@ -29,6 +29,12 @@ def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
 
     return temperature, humidity
 
+def get_decimal_hour():
+    current_hour = datetime.now()
+    return current_hour.hour + (
+        60 * current_hour.minute + current_hour.second
+        ) / 3600
+
 
 def solar_irradiation_simulator(x):
     if x < 7 or x > 19:
@@ -43,18 +49,28 @@ def solar_irradiation_simulator(x):
 
 
 def fetch_solar_irradiation():
-    current_hour = datetime.now()
-    x = current_hour.hour + (
-        60 * current_hour.minute + current_hour.second
-        ) / 3600
-
+    x = get_decimal_hour()
     return round(solar_irradiation_simulator(x))
 
 
-def create_packet(temperature: float = None,
-                  humidity: float = None,
-                  light: float = None,
-                  watering: float = None):
+def watering_simulator(x):
+    x %= 6
+    x /= 6
+    x *= 100
+    x = 100 - x
+    return x
+
+
+def fetch_watering():
+    x = get_decimal_hour()
+    return round(watering_simulator(x))
+
+
+
+def create_packet(temperature: int = None,
+                  humidity: int = None,
+                  light: int = None,
+                  watering: int = None):
     '''
     Creates a data packet with simulated data, validating the data before that.
 
@@ -68,7 +84,10 @@ def create_packet(temperature: float = None,
     - Light has to be positive or 0.
     '''
 
-    if not (temperature and humidity and light and watering):
+    if not (temperature is not None
+            and humidity is not None
+            and light is not None
+            and watering is not None):
         return None
 
     if humidity < 0 or humidity > 100:
@@ -107,7 +126,7 @@ def generate_data(location="Pilar, AR") -> Tuple[int, int, int, int]:
 
     temperature, humidity = fetch_temperature_and_humidity(location)
     light = fetch_solar_irradiation()
-    watering = rnd.randint(0, 100)
+    watering = fetch_watering()
 
     return temperature, humidity, light, watering 
 

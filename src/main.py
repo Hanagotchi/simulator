@@ -9,8 +9,7 @@ Cada N segundos:
     - Enviar paquete a la queue.
 '''
 
-import time
-import random
+import time, random
 import logging
 
 from data_packet import generate_data, create_packet, current_packet_differs_from_last_sent
