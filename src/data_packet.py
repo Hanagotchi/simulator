@@ -31,6 +31,9 @@ def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
 
 
 def solar_irradiation_simulator(x):
+    if x < 7 or x > 19:
+        return 0
+
     x += 14
     x *= (math.pi / 6)
     x = math.sin(x)
