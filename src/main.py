@@ -12,9 +12,7 @@ Cada N segundos:
 import time
 import random
 import logging
-
-from data_packet import generate_data, create_packet
-from data_packet import current_packet_differs_from_last_sent
+from data_packet import generate_data, create_packet, data_has_changed
 
 
 def simulate_packets(config):
@@ -22,19 +20,15 @@ def simulate_packets(config):
     while True:
         try:
             temperature, humidity, light, watering = generate_data()
-            current_packet = create_packet(
-                temperature, humidity, light, watering
-                )
+            current_packet = create_packet(temperature, humidity, light, watering)
 
-            if not current_packet:
+            if not current_packet or not data_has_changed(current_packet, last_sent_packet, config["deviations"]):
                 continue
 
-            if current_packet_differs_from_last_sent(current_packet,
-                                                     last_sent_packet,
-                                                     config["deviations"]):
-                # TODO: Send packet to the RabbitMQ queue
-                logging.info(f"Packet sent: {current_packet}")
-                last_sent_packet = current_packet
+            # TODO: Send packet to the RabbitMQ queue
+            logging.info(f"Packet sent: {current_packet}")
+            last_sent_packet = current_packet
+
 
         except Exception as err:
             logging.warning(err)
@@ -47,7 +41,6 @@ def read_config_file(path):
     '''
     Reads the config file. At this moment, it is mocked.
     '''
-
     # TODO
     return {
         "packet_period": 1,

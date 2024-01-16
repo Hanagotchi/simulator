@@ -8,7 +8,6 @@ import math
 
 load_dotenv()
 
-
 def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
 
     base_params = {
@@ -104,6 +103,20 @@ def create_packet(temperature: int = None,
             f"Light has to be positive or 0. Current value: {light}"
             )
 
+def create_packet(temperature: float = None, humidity: float = None, light: float = None, watering: float = None):
+    if not (temperature and humidity and light and watering):
+        return None
+
+    if humidity < 0 or humidity > 100:
+        raise Exception(f"Humidity has to be between 0 and 100. Current value: {humidity}")
+
+    if watering < 0 or watering > 100:
+        raise Exception(f"Watering has to be between 0 and 100. Current value: {watering}")
+
+    if light < 0:
+        raise Exception(f"Light has to be positive or 0. Current value: {light}")
+
+
     return {
         "temperature": temperature,
         "humidity": humidity,
@@ -121,7 +134,6 @@ def generate_data(location="Pilar, AR") -> Tuple[int, int, int, int]:
     -
     -
     '''
-    # TODO
 
     temperature, humidity = fetch_temperature_and_humidity(location)
     light = fetch_solar_irradiation()
@@ -130,7 +142,7 @@ def generate_data(location="Pilar, AR") -> Tuple[int, int, int, int]:
     return temperature, humidity, light, watering 
 
 
-def current_packet_differs_from_last_sent(current, last_sent, deviations):
+def data_has_changed(current, last_sent, deviations):
     '''
     Compares the current packet and the last sent packet, 
     based in the deviations.
@@ -153,9 +165,18 @@ def current_packet_differs_from_last_sent(current, last_sent, deviations):
     - deviations: {temperature: float, humidity: float, light: float,
     watering: float}
     '''
-    # TODO
-
+        
     if not last_sent:
         return True
 
-    return True
+    if parameter_has_changed(current["temperature"], last_sent["temperature"], deviations["temperature"])\
+            or parameter_has_changed(current["humidity"], last_sent["humidity"], deviations["humidity"])\
+            or parameter_has_changed(current["light"], last_sent["light"], deviations["light"])\
+            or parameter_has_changed(current["watering"], last_sent["watering"], deviations["watering"]):
+        return True
+
+    return False
+
+
+def parameter_has_changed(current, last, deviation):
+    return abs(current - last) > deviation
