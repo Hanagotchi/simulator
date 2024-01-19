@@ -82,10 +82,7 @@ def create_packet(temperature: int = None,
     - Light has to be positive or 0.
     '''
 
-    if not (temperature is not None
-            and humidity is not None
-            and light is not None
-            and watering is not None):
+    if temperature is None and humidity is None and light is None and watering is None:
         return None
 
     if humidity < 0 or humidity > 100:
