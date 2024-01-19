@@ -1,0 +1,10 @@
+{
+    "packet_period": 1,
+    "device_id": "97bebd21-a9c8-41a3-9a88-969cd3dd7bba",
+    "deviations": {
+        "temperature": 3,
+        "humidity": 5,
+        "light": 25,
+        "watering": 5
+    }
+}

@@ -9,7 +9,8 @@ Cada N segundos:
     - Enviar paquete a la queue.
 '''
 
-import time, random
+import time
+import json
 import logging
 
 from data_packet import generate_data, create_packet, data_has_changed
@@ -34,28 +35,22 @@ def simulate_packets(config):
         finally:
             time.sleep(config["packet_period"])
 
-
-'''
-Reads the config file. At this moment, it is mocked.
-'''
-
-
 def read_config_file(path):
-    # TODO
-    return {
-        "packet_period": 1,
-        "device_id": str(random.getrandbits(128)),
-        "deviations": {
-            "temperature": 3,
-            "humidity": 5,
-            "light": 25,
-            "watering": 5
-        }
-    }
+    try:
+        with open(path, 'r') as file:
+            config_data = json.load(file)
+        return config_data
+    except FileNotFoundError:
+        logging.error(f"Config file not found at: {path}")
+        raise
+    except json.JSONDecodeError as json_err:
+        logging.error(f"Error decoding config file: {json_err}")
+        raise
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    config = read_config_file("")
+    config_path = "config.json"
+    config = read_config_file(config_path)
 
     simulate_packets(config)
