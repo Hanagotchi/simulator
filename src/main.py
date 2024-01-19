@@ -11,11 +11,15 @@ Cada N segundos:
 
 import time, random
 import logging
+import json
+from common.middleware import Middleware
 
 from data_packet import generate_data, create_packet, data_has_changed
 
 
 def simulate_packets(config):
+    middleware = Middleware()
+    middleware.create_queue("device_plant")
     last_sent_packet = None
     while True:
         try:
@@ -25,7 +29,7 @@ def simulate_packets(config):
             if not current_packet or not data_has_changed(current_packet, last_sent_packet, config["deviations"]):
                 continue
 
-            # TODO: Send packet to the RabbitMQ queue
+            middleware.send_message("device_plant", json.dumps(current_packet))
             logging.info(f"Packet sent: {current_packet}")
             last_sent_packet = current_packet
 
