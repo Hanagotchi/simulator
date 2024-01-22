@@ -9,7 +9,8 @@ Cada N segundos:
     - Enviar paquete a la queue.
 '''
 
-import time, random
+import time
+import random
 import logging
 import json
 from common.middleware import Middleware
@@ -33,18 +34,18 @@ def simulate_packets(config):
             logging.info(f"Packet sent: {current_packet}")
             last_sent_packet = current_packet
 
+
         except Exception as err:
             logging.warning(err)
         finally:
+            print(current_packet)
             time.sleep(config["packet_period"])
 
 
-'''
-Reads the config file. At this moment, it is mocked.
-'''
-
-
 def read_config_file(path):
+    '''
+    Reads the config file. At this moment, it is mocked.
+    '''
     # TODO
     return {
         "packet_period": 1,
