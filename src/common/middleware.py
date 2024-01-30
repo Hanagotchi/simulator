@@ -44,7 +44,6 @@ class Middleware:
         self._setup_message_consumption(queue_name, user_function)
 
     def send_message(self, queue_name, message):
-        print(f"Message sending: {message} to {queue_name}")
         self._channel.basic_publish(exchange='',
                                     routing_key=queue_name,
                                     body=message)

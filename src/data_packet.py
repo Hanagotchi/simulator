@@ -7,7 +7,6 @@ from datetime import datetime
 import logging
 import math
 import uuid
-import random
 
 load_dotenv()
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -89,13 +88,16 @@ def create_packet(temperature: float = None, humidity: float = None,
         return None
 
     if humidity < 0 or humidity > 100:
-        raise Exception(f"Humidity has to be between 0 and 100. Current value: {humidity}")
+        raise Exception(f"Humidity has to be between 0 and 100."
+                        f"Current value: {humidity}")
 
     if watering < 0 or watering > 100:
-        raise Exception(f"Watering has to be between 0 and 100. Current value: {watering}")
+        raise Exception(f"Watering has to be between 0 and 100. "
+                        f"Current value: {watering}")
 
     if light < 0:
-        raise Exception(f"Light has to be positive or 0. Current value: {light}")
+        raise Exception(f"Light has to be positive or 0. "
+                        f"Current value: {light}")
 
     return {
         "temperature": temperature,
@@ -152,10 +154,14 @@ def data_has_changed(current, last_sent, deviations):
     if not last_sent:
         return True
 
-    if parameter_has_changed(current["temperature"], last_sent["temperature"], deviations["temperature"])\
-            or parameter_has_changed(current["humidity"], last_sent["humidity"], deviations["humidity"])\
-            or parameter_has_changed(current["light"], last_sent["light"], deviations["light"])\
-            or parameter_has_changed(current["watering"], last_sent["watering"], deviations["watering"]):
+    if parameter_has_changed(current["temperature"], last_sent["temperature"],
+                             deviations["temperature"])\
+            or parameter_has_changed(current["humidity"], last_sent["humidity"],
+                                     deviations["humidity"])\
+            or parameter_has_changed(current["light"], last_sent["light"],
+                                     deviations["light"])\
+            or parameter_has_changed(current["watering"], last_sent["watering"],
+                                     deviations["watering"]):
         return True
 
     return False

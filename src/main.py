@@ -20,10 +20,8 @@ from data_packet import generate_data, create_packet, data_has_changed
 
 
 def simulate_packets(config):
-    print(f"Simulatingg packets")
     middleware = Middleware()
     queue_name = os.environ.get("QUEUE_NAME")
-    print(f"creatingg queueee: {queue_name}")
     middleware.create_queue(queue_name)
     last_sent_packet = None
     current_packet = None
@@ -32,24 +30,21 @@ def simulate_packets(config):
             temperature, humidity, light, watering = generate_data()
             current_packet = create_packet(temperature, humidity, light,
                                            watering)
-            print(f"packet created: {current_packet}")
 
             if not current_packet or not data_has_changed(
                 current_packet,
                 last_sent_packet,
                 config["deviations"]
             ):
-                print("no se envia")
                 continue
             middleware.send_message(queue_name, json.dumps(current_packet))
-            print("holaaaa")
             logging.info(f"Packet sent: {current_packet}")
             last_sent_packet = current_packet
 
         except Exception as err:
             logging.warning(f"{err}")
         finally:
-            # print(current_packet)
+            print(current_packet)
             time.sleep(config["packet_period"])
 
 
@@ -72,10 +67,8 @@ def read_config_file(path):
 
 def main():
     logging_level = os.environ.get("LOGGING_LEVEL")
-    print(f"logging level: {logging_level}")
     initialize_log(logging_level)
     config = read_config_file("")
-    print(f"config: {config}")
     simulate_packets(config)
 
 
@@ -95,5 +88,4 @@ def initialize_log(logging_level):
 
 
 if __name__ == '__main__':
-    print("starting")
     main()
