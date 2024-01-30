@@ -5,9 +5,10 @@ import os
 class Middleware:
 
     def __init__(self):
-        self._connection = (pika.BlockingConnection
-                            (pika.ConnectionParameters(host=os.environ.get
-                                                       ("RABBITMQ_HOST"))))
+        rabbitmq_host = os.environ.get("RABBITMQ_HOST", "localhost")
+        self._connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=rabbitmq_host)
+        )
         self._channel = self._connection.channel()
         self._exit = False
         self._remake = False
@@ -43,6 +44,7 @@ class Middleware:
         self._setup_message_consumption(queue_name, user_function)
 
     def send_message(self, queue_name, message):
+        print(f"Message sending: {message} to {queue_name}")
         self._channel.basic_publish(exchange='',
                                     routing_key=queue_name,
                                     body=message)

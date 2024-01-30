@@ -4,7 +4,6 @@ all:
 
 docker-image:
 	docker build -f Dockerfile -t main-app .
-	docker build -f src/rabbitmq/Dockerfile -t rabbitmq ./src/rabbitmq
 .PHONY: docker-image
 
 docker-compose-up: docker-image

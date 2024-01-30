@@ -8,25 +8,9 @@ services:
     image: main-app
     env_file:
       - .env
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-  rabbitmq:
-    build:
-      context: ./src/rabbitmq
-      dockerfile: Dockerfile
-    image: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "rabbitmq-diagnostics",
-          "check_port_connectivity"
-        ]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 50s
+    networks:
+      - common_network
+
+networks:
+  common_network:
+    external: true
