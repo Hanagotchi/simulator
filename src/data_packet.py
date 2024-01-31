@@ -4,9 +4,14 @@ from dotenv import load_dotenv
 from os import environ
 from typing import Tuple
 from datetime import datetime
+import logging
 import math
+import uuid
 
 load_dotenv()
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+UUID = str(uuid.uuid4()).replace("-", "")
+
 
 def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
 
@@ -18,7 +23,7 @@ def fetch_temperature_and_humidity(location: str) -> Tuple[int, int]:
 
     if not res.ok:
         raise Exception(
-            "Could fetch temperature and humidity from weather API"
+            "Could not fetch temperature and humidity from weather API"
             )
 
     result = res.json()
@@ -65,14 +70,12 @@ def fetch_watering():
     return round(watering_simulator(x))
 
 
-def create_packet(temperature: int = None,
-                  humidity: int = None,
-                  light: int = None,
-                  watering: int = None):
+def create_packet(temperature: float = None, humidity: float = None,
+                  light: float = None, watering: float = None):
     '''
     Creates a data packet with simulated data, validating the data before that.
 
-    If all the parameters are empty, returns None. Else, return a dictionary 
+    If all the parameters are empty, returns None. Else, return a dictionary
     with the data.
 
 
@@ -81,44 +84,28 @@ def create_packet(temperature: int = None,
     percentages.
     - Light has to be positive or 0.
     '''
-
-    if temperature is None and humidity is None and light is None and watering is None:
+    if not (temperature or humidity or light or watering):
         return None
 
     if humidity < 0 or humidity > 100:
-        raise Exception(
-            f"Humidity has to be between 0 and 100. Current value: {humidity}"
-            )
+        raise Exception(f"Humidity has to be between 0 and 100."
+                        f"Current value: {humidity}")
 
     if watering < 0 or watering > 100:
-        raise Exception(
-            f"Watering has to be between 0 and 100. Current value: {watering}"
-            )
+        raise Exception(f"Watering has to be between 0 and 100. "
+                        f"Current value: {watering}")
 
     if light < 0:
-        raise Exception(
-            f"Light has to be positive or 0. Current value: {light}"
-            )
-
-def create_packet(temperature: float = None, humidity: float = None, light: float = None, watering: float = None):
-    if not (temperature and humidity and light and watering):
-        return None
-
-    if humidity < 0 or humidity > 100:
-        raise Exception(f"Humidity has to be between 0 and 100. Current value: {humidity}")
-
-    if watering < 0 or watering > 100:
-        raise Exception(f"Watering has to be between 0 and 100. Current value: {watering}")
-
-    if light < 0:
-        raise Exception(f"Light has to be positive or 0. Current value: {light}")
-
+        raise Exception(f"Light has to be positive or 0. "
+                        f"Current value: {light}")
 
     return {
         "temperature": temperature,
         "humidity": humidity,
         "light": light,
-        "watering": watering
+        "watering": watering,
+        "time_stamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "id_device": UUID
     }
 
 
@@ -133,15 +120,16 @@ def generate_data(location="Pilar, AR") -> Tuple[int, int, int, int]:
     '''
 
     temperature, humidity = fetch_temperature_and_humidity(location)
+    # esto no va a producir cambios instantaneamente, pero es para probar
     light = fetch_solar_irradiation()
     watering = fetch_watering()
 
-    return temperature, humidity, light, watering 
+    return temperature, humidity, light, watering
 
 
 def data_has_changed(current, last_sent, deviations):
     '''
-    Compares the current packet and the last sent packet, 
+    Compares the current packet and the last sent packet,
     based in the deviations.
 
     If any parameter differs enough from the last sent packet, then the packet
@@ -162,14 +150,18 @@ def data_has_changed(current, last_sent, deviations):
     - deviations: {temperature: float, humidity: float, light: float,
     watering: float}
     '''
-        
+
     if not last_sent:
         return True
 
-    if parameter_has_changed(current["temperature"], last_sent["temperature"], deviations["temperature"])\
-            or parameter_has_changed(current["humidity"], last_sent["humidity"], deviations["humidity"])\
-            or parameter_has_changed(current["light"], last_sent["light"], deviations["light"])\
-            or parameter_has_changed(current["watering"], last_sent["watering"], deviations["watering"]):
+    if parameter_has_changed(current["temperature"], last_sent["temperature"],
+                             deviations["temperature"])\
+            or parameter_has_changed(current["humidity"], last_sent["humidity"],
+                                     deviations["humidity"])\
+            or parameter_has_changed(current["light"], last_sent["light"],
+                                     deviations["light"])\
+            or parameter_has_changed(current["watering"], last_sent["watering"],
+                                     deviations["watering"]):
         return True
 
     return False
