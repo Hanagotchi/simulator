@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  main-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: main-app
+    env_file:
+      - .env
+    networks:
+      - common_network
+
+networks:
+  common_network:
+    external: true
