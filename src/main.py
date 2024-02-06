@@ -10,7 +10,6 @@ Cada N segundos:
 '''
 
 import time
-import random
 import logging
 import json
 import os
@@ -49,26 +48,23 @@ def simulate_packets(config):
 
 
 def read_config_file(path):
-    '''
-    Reads the config file. At this moment, it is mocked.
-    '''
-    # TODO
-    return {
-        "packet_period": 1,
-        "device_id": str(random.getrandbits(128)),
-        "deviations": {
-            "temperature": 3,
-            "humidity": 5,
-            "light": 25,
-            "watering": 5
-        }
-    }
+    try:
+        with open(path, 'r') as file:
+            config_data = json.load(file)
+        return config_data
+    except FileNotFoundError:
+        logging.error(f"Config file not found at: {path}")
+        raise
+    except json.JSONDecodeError as json_err:
+        logging.error(f"Error decoding config file: {json_err}")
+        raise
 
 
 def main():
     logging_level = os.environ.get("LOGGING_LEVEL")
     initialize_log(logging_level)
-    config = read_config_file("")
+    config_path = "config.json"
+    config = read_config_file(config_path)
     simulate_packets(config)
 
 
